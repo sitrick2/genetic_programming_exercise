@@ -4,14 +4,21 @@ package controller.gp;
  * 
  * @author sitrick2 Class establishes an operator node for the tree structure.
  */
-public class OperatorNode extends Node {
+class OperatorNode extends Node {
 
 	private char value;
 
 	protected OperatorNode(char value, int level) {
 		super(level);
 
-		if (value == '+' || value == '-' || value == '*' || value == '/')
+		if (isValidValue(value))
+			this.value = value;
+	}
+
+	protected OperatorNode(char value, int level, Node parent) {
+		super(level, parent);
+
+		if (isValidValue(value))
 			this.value = value;
 	}
 
@@ -20,10 +27,14 @@ public class OperatorNode extends Node {
 	}
 
 	protected boolean setValue(char value) {
-		if (value == '+' || value == '-' || value == '*' || value == '/') {
+		if (isValidValue(value)) {
 			this.value = value;
 			return true;
 		} else
 			return false;
+	}
+
+	private boolean isValidValue(char value) {
+		return (value == '+' || value == '-' || value == '*' || value == '/');
 	}
 }

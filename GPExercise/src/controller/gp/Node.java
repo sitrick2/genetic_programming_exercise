@@ -23,7 +23,7 @@ abstract class Node {
 	/**
 	 * New node with parent set.
 	 */
-	protected Node(Node parent, int level) {
+	protected Node(int level, Node parent) {
 		this.parent = parent;
 		aChild = null;
 		bChild = null;
