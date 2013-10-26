@@ -1,4 +1,4 @@
-package controller.gp;
+package model.gp;
 
 /**
  * 
@@ -15,8 +15,8 @@ class OperatorNode extends Node {
 			this.value = value;
 	}
 
-	protected OperatorNode(char value, int level, Node parent) {
-		super(level, parent);
+	protected OperatorNode(char value) {
+		super();
 
 		if (isValidValue(value))
 			this.value = value;

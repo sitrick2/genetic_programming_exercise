@@ -1,4 +1,4 @@
-package controller.gp;
+package model.gp;
 
 /**
  * abstract superclass for Nodes. Establishes all the methods every node should
@@ -23,11 +23,11 @@ abstract class Node {
 	/**
 	 * New node with parent set.
 	 */
-	protected Node(int level, Node parent) {
-		this.parent = parent;
+	protected Node() {
+		this.parent = null;
 		aChild = null;
 		bChild = null;
-		this.level = level;
+		this.level = 0;
 	}
 
 	/**
@@ -48,26 +48,25 @@ abstract class Node {
 	 * 
 	 * @return true if successful.
 	 */
-	protected boolean setChild(Node child) {
-		if (aChild == null) {
+	protected void setLeftChild(Node child) {
 			aChild = child;
-			return true;
-		} else if (bChild == null) {
-			bChild = child;
-			return true;
-		} else
-			return false;
 	}
+	
+	protected void setRightChild(Node child) {
+		bChild = child;
+}
 
 	protected Node getParent() {
 		return this.parent;
 	}
 
-	protected Node[] getChildren() {
-		Node[] children = { aChild, bChild };
-
-		return children;
+	protected Node getLeftChild() {
+				return aChild;
 	}
+	
+	protected Node getRightChild() {
+		return bChild;
+}
 
 	protected int getLevel() {
 		return this.level;
