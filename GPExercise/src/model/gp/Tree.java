@@ -1,73 +1,75 @@
 package model.gp;
 
 import java.util.Random;
-import java.util.Stack;
 
 public class Tree implements Comparable<Tree> {
 
-	private int height;					// height of the tree
-	private Stack<Node> tree;			//stack collection for managing the tree
-	private OperatorNode root;			//root node of the tree
-	private static Random rand;			//randomizer for generating values and randomizing decisions.
-	private int numNodesInBottomLevel;	//tracks how many nodes should be in the level about to be created;\
+	private int height; // height of the tree
+	private OperatorNode root; // root node of the tree
+	private static Random rand; // randomizer for generating values and
+								// randomizing decisions.
+	private int numNodesInBottomLevel; // tracks how many nodes should be in the
+										// level about to be created
+	private Node lastCreatedNode;
 
-	
 	/**
-	 * Constructs a "tree" using a Stack algorithm out of OperatorNodes, OperandNodes, and VariableNodes.
+	 * Constructs a tree out of OperatorNodes, OperandNodes, and VariableNodes.
 	 * 
-	 * @param height how many levels deep the tree should grow.
+	 * @param height
+	 *            how many levels deep the tree should grow.
 	 */
 	public Tree(int height) {
 		this.height = height;
-		tree = new Stack<Node>();
 		root = new OperatorNode(setRandomOp(), 0);
-		this.insert(root);
+		this.insert(root, null);
 		numNodesInBottomLevel = 1;
+		lastCreatedNode = root;
 
 		for (int i = 1; i < height; i++) {
 			numNodesInBottomLevel = 2 * numNodesInBottomLevel;
 			for (int j = 0; j < numNodesInBottomLevel; j++) {
 				double randomizer = rand.nextDouble();
 				if (i < height - 1 && randomizer < .50) {
-					this.insert(new OperatorNode(setRandomOp(), i));
+					OperatorNode temp = new OperatorNode(setRandomOp(), i);
+					this.insert(temp, lastCreatedNode);
+					lastCreatedNode = temp;
 				} else if (randomizer >= .50 && randomizer < .90) {
-					this.insert(new OperandNode(rand.nextInt(10), i));
-				} else
-					this.insert(new VariableNode(i));
+					OperandNode temp = new OperandNode(rand.nextInt(10), i);
+					this.insert(temp, lastCreatedNode);
+					lastCreatedNode = temp;
+				} else {
+					VariableNode temp = new VariableNode(i);
+					this.insert(temp, lastCreatedNode);
+					lastCreatedNode = temp;
+				}
 			}
 		}
 	}
 
-	private boolean insert(Node node) {
-		if (tree.empty() && node instanceof OperatorNode) {
-			tree.add(node);
+	private boolean insert(Node node, Node parent) {
+		if (parent.equals(null) && node instanceof OperatorNode) {
+			root = (OperatorNode) node;
+			root.setParent(null);
 			return true;
-		} else if (!tree.empty() && tree.peek() instanceof OperatorNode) {
-			tree.peek().setLeftChild(node);
-			tree.add(node);
+		} else if (!parent.equals(null) && parent instanceof OperatorNode) {
+			parent.setLeftChild(node);
+			node.setParent(parent);
 			return true;
-		} else if (!tree.empty() && tree.peek() instanceof OperandNode) {
-			Stack<Node> temp = new Stack<Node>();
+		} else if (!parent.equals(null) && parent instanceof OperandNode) {
+			Node properspot = backtrackToFindValidNode(parent);
+			properspot.setRightChild(node);
+			node.setParent(properspot);
+			return true;
 
-			for (int i = 0; i < tree.size(); i++) {
-				if (tree.peek().getRightChild() == null) {
-					tree.peek().setRightChild(node);
-					tree.add(node);
-					for (int j = 0; j < temp.size(); j++) {
-						tree.push(temp.pop());
-					}
-					return true;
-				}
-
-				temp.push(tree.pop());
-			}
-
-			for (int i = 0; i < temp.size(); i++) {
-				tree.push(temp.pop());
-			}
-			return false;
 		} else
 			return false;
+	}
+
+	private Node backtrackToFindValidNode(Node node) {
+		if (node.getRightChild().equals(null))
+			return node;
+		else
+			return backtrackToFindValidNode(node.getParent());
 	}
 
 	private static char setRandomOp() {
@@ -95,13 +97,45 @@ public class Tree implements Comparable<Tree> {
 		return solution;
 	}
 
+	public double eval(Node root, int valueForX) {
+		if (root.equals(null)) {
+			return 0;
+		} else if (root instanceof OperatorNode) {
+			OperatorNode op = (OperatorNode) root;
+
+			if (op.getValue() == '-') {
+				return eval(root.getRightChild(), valueForX)
+						- eval(root.getLeftChild(), valueForX);
+			} else if (op.getValue() == '*') {
+				return eval(root.getRightChild(), valueForX)
+						* eval(root.getLeftChild(), valueForX);
+			} else if (op.getValue() == '/') {
+				double temp = eval(root.getLeftChild(), valueForX);
+				if (temp == 0) {
+					return eval(root.getRightChild(), valueForX)
+							+ eval(root.getLeftChild(), valueForX);
+				} else {
+					return eval(root.getRightChild(), valueForX)
+							/ eval(root.getLeftChild(), valueForX);
+				}
+			} else {
+				return eval(root.getRightChild(), valueForX)
+						+ eval(root.getLeftChild(), valueForX);
+			}
+		} else if (root instanceof OperandNode) {
+			OperandNode temp = (OperandNode) root;
+			return temp.getValue();
+		} else
+			return valueForX;
+
+	}
+
 	public int compareTo(Tree t) {
 		// TODO
 		return 0;
 	}
-	
-	public int getHeight()
-	{
+
+	public int getHeight() {
 		return this.height;
 	}
 
