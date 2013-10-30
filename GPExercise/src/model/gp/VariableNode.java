@@ -25,4 +25,9 @@ class VariableNode extends Node {
 		return value;
 	}
 
+	@Override
+	public String getStringValue() {
+		return "x";
+	}
+
 }

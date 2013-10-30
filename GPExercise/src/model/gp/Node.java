@@ -4,7 +4,7 @@ package model.gp;
  * abstract superclass for Nodes. Establishes all the methods every node should
  * have (getters/setters, treelevel, parent/child nodes, etc.)
  */
-abstract class Node {
+abstract class Node implements HasValue {
 	private Node parent;
 	private Node aChild;
 	private Node bChild;

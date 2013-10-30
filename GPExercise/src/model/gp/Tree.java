@@ -6,7 +6,7 @@ public class Tree implements Comparable<Tree> {
 
 	private int height; // height of the tree
 	private OperatorNode root; // root node of the tree
-	private static Random rand; // randomizer for generating values and
+	private Random rand; // randomizer for generating values and
 								// randomizing decisions.
 	private int numNodesInBottomLevel; // tracks how many nodes should be in the
 										// level about to be created
@@ -19,8 +19,9 @@ public class Tree implements Comparable<Tree> {
 	 *            how many levels deep the tree should grow.
 	 */
 	public Tree(int height) {
+		rand = new Random();
 		this.height = height;
-		root = new OperatorNode(setRandomOp(), 0);
+		root = new OperatorNode(Tree.setRandomOp(), 0);
 		this.insert(root, null);
 		numNodesInBottomLevel = 1;
 		lastCreatedNode = root;
@@ -47,15 +48,15 @@ public class Tree implements Comparable<Tree> {
 	}
 
 	private boolean insert(Node node, Node parent) {
-		if (parent.equals(null) && node instanceof OperatorNode) {
+		if (parent == null && node instanceof OperatorNode) {
 			root = (OperatorNode) node;
 			root.setParent(null);
 			return true;
-		} else if (!parent.equals(null) && parent instanceof OperatorNode) {
+		} else if (parent != null && parent instanceof OperatorNode) {
 			parent.setLeftChild(node);
 			node.setParent(parent);
 			return true;
-		} else if (!parent.equals(null) && parent instanceof OperandNode) {
+		} else if (parent != null && parent instanceof OperandNode) {
 			Node properspot = backtrackToFindValidNode(parent);
 			properspot.setRightChild(node);
 			node.setParent(properspot);
@@ -66,7 +67,7 @@ public class Tree implements Comparable<Tree> {
 	}
 
 	private Node backtrackToFindValidNode(Node node) {
-		if (node.getRightChild().equals(null))
+		if (node.getRightChild() == null)
 			return node;
 		else
 			return backtrackToFindValidNode(node.getParent());
@@ -75,8 +76,9 @@ public class Tree implements Comparable<Tree> {
 	private static char setRandomOp() {
 		int opdecider; // used with randomizer to determine Node values for
 						// operators
-
-		opdecider = rand.nextInt(4);
+		Random r = new Random();
+		
+		opdecider = r.nextInt(4);
 		char solution;
 
 		switch (opdecider) {
@@ -97,37 +99,46 @@ public class Tree implements Comparable<Tree> {
 		return solution;
 	}
 
-	public double eval(Node root, int valueForX) {
-		if (root.equals(null)) {
+	//TODO: rewrite this to take a tree as a parameter.
+	public double eval(Node rootnode, int valueForX) {
+		if (rootnode.equals(null)) {
 			return 0;
-		} else if (root instanceof OperatorNode) {
-			OperatorNode op = (OperatorNode) root;
+		} else if (rootnode instanceof OperatorNode) {
+			OperatorNode op = (OperatorNode) rootnode;
 
 			if (op.getValue() == '-') {
-				return eval(root.getRightChild(), valueForX)
-						- eval(root.getLeftChild(), valueForX);
+				return eval(rootnode.getRightChild(), valueForX)
+						- eval(rootnode.getLeftChild(), valueForX);
 			} else if (op.getValue() == '*') {
-				return eval(root.getRightChild(), valueForX)
-						* eval(root.getLeftChild(), valueForX);
+				return eval(rootnode.getRightChild(), valueForX)
+						* eval(rootnode.getLeftChild(), valueForX);
 			} else if (op.getValue() == '/') {
-				double temp = eval(root.getLeftChild(), valueForX);
+				double temp = eval(rootnode.getLeftChild(), valueForX);
 				if (temp == 0) {
-					return eval(root.getRightChild(), valueForX)
-							+ eval(root.getLeftChild(), valueForX);
+					return eval(rootnode.getRightChild(), valueForX)
+							+ temp;
 				} else {
-					return eval(root.getRightChild(), valueForX)
-							/ eval(root.getLeftChild(), valueForX);
+					return eval(rootnode.getRightChild(), valueForX)
+							/ eval(rootnode.getLeftChild(), valueForX);
 				}
 			} else {
-				return eval(root.getRightChild(), valueForX)
-						+ eval(root.getLeftChild(), valueForX);
+				return eval(rootnode.getRightChild(), valueForX)
+						+ eval(rootnode.getLeftChild(), valueForX);
 			}
-		} else if (root instanceof OperandNode) {
-			OperandNode temp = (OperandNode) root;
+		} else if (rootnode instanceof OperandNode) {
+			OperandNode temp = (OperandNode) rootnode;
 			return temp.getValue();
 		} else
 			return valueForX;
-
+	}
+	
+	//TODO This is broken. Fix so this works.
+	public String getString(Node rootnode) {
+		if (rootnode == null) {
+			return "";
+		} else if (rootnode.getLeftChild() == null && rootnode.getRightChild() == null){
+			return rootnode.getStringValue();
+		} else return getString(rootnode.getLeftChild()) + rootnode.getStringValue() + getString(rootnode.getRightChild());
 	}
 
 	public int compareTo(Tree t) {
@@ -137,6 +148,11 @@ public class Tree implements Comparable<Tree> {
 
 	public int getHeight() {
 		return this.height;
+	}
+	
+	public Node getRoot()
+	{
+		return this.root;
 	}
 
 }

@@ -24,6 +24,10 @@ class OperandNode extends Node {
 	protected int getValue() {
 		return value;
 	}
+	
+	public String getStringValue(){
+		return "" + value;
+	}
 
 	protected boolean setValue(int value) {
 		if (isValidValue(value)) {

@@ -37,4 +37,9 @@ class OperatorNode extends Node {
 	private boolean isValidValue(char value) {
 		return (value == '+' || value == '-' || value == '*' || value == '/');
 	}
+
+	@Override
+	public String getStringValue() {
+		return "" + value;
+	}
 }
