@@ -46,7 +46,7 @@ public class Tree implements Comparable<Tree> {
 			}
 		}
 	}
-
+	//TODO this is probably broken
 	private boolean insert(Node node, Node parent) {
 		if (parent == null && node instanceof OperatorNode) {
 			root = (OperatorNode) node;
@@ -99,9 +99,9 @@ public class Tree implements Comparable<Tree> {
 		return solution;
 	}
 
-	//TODO: rewrite this to take a tree as a parameter.
+	//TODO: rewrite this to take a tree as a parameter. Probably broken too.
 	public double eval(Node rootnode, int valueForX) {
-		if (rootnode.equals(null)) {
+		if (rootnode == null) {
 			return 0;
 		} else if (rootnode instanceof OperatorNode) {
 			OperatorNode op = (OperatorNode) rootnode;
@@ -134,11 +134,36 @@ public class Tree implements Comparable<Tree> {
 	
 	//TODO This is broken. Fix so this works.
 	public String getString(Node rootnode) {
-		if (rootnode == null) {
-			return "";
-		} else if (rootnode.getLeftChild() == null && rootnode.getRightChild() == null){
-			return rootnode.getStringValue();
-		} else return getString(rootnode.getLeftChild()) + rootnode.getStringValue() + getString(rootnode.getRightChild());
+		boolean isBottom = isOperandLeaf(rootnode.getLeftChild()) && isOperandLeaf(rootnode.getRightChild()); 
+		boolean leftIsBottom = isOperandLeaf(rootnode.getLeftChild()) && !isOperandLeaf(rootnode.getRightChild());
+		boolean rightIsBottom = !isOperandLeaf(rootnode.getLeftChild()) && isOperandLeaf(rootnode.getRightChild());
+		
+		if (isBottom)
+		{
+			return rootnode.getLeftChild().getStringValue() + rootnode.getStringValue() + rootnode.getRightChild().getStringValue();
+		}
+		else if (leftIsBottom)
+		{
+			return rootnode.getLeftChild().getStringValue() + rootnode.getStringValue() + getString(rootnode.getRightChild());
+		}
+		else if (rightIsBottom)
+		{
+			return getString(rootnode.getLeftChild()) + rootnode.getStringValue() + rootnode.getRightChild().getStringValue();
+		}
+		else return "";
+	}
+	
+	private boolean isOperandLeaf(Node node)
+	{
+		if (node == null)
+			return false;
+		else if (node.getLeftChild() == null && node.getRightChild() == null)
+		{
+			if (node instanceof OperatorNode || node instanceof VariableNode){
+				return true;
+			}
+		}
+	 return false;
 	}
 
 	public int compareTo(Tree t) {

@@ -5,5 +5,6 @@ public class Test {
 	{
 		Tree testtree = new Tree(9);
 		System.out.println(testtree.getString(testtree.getRoot()));
+		System.out.println(testtree.eval(testtree.getRoot(), 5));
 	}
 }
