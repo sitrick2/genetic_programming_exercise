@@ -1,22 +1,14 @@
 package model.gp;
 
 /**
- * Class establishes an operand node for the tree structure.
+ * Establishes an operand node for the tree structure, with a settable value
+ * between 0-9, inclusive.
  */
 class OperandNode extends Node {
 
 	private int value;
 
-	protected OperandNode(int value, int level) {
-		super(level);
-
-		if (isValidValue(value))
-			this.value = value;
-	}
-
 	protected OperandNode(int value) {
-		super();
-
 		if (isValidValue(value))
 			this.value = value;
 	}
@@ -24,8 +16,8 @@ class OperandNode extends Node {
 	protected int getValue() {
 		return value;
 	}
-	
-	public String getStringValue(){
+
+	public String getStringValue() {
 		return "" + value;
 	}
 

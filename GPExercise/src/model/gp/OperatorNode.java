@@ -1,23 +1,15 @@
 package model.gp;
 
 /**
- * 
- * @author sitrick2 Class establishes an operator node for the tree structure.
+ * Establishes an operator node for the tree structure, allowing for addition,
+ * subtraction, multiplication and division. Checks to ensure valid operator is
+ * set before continuing.
  */
 class OperatorNode extends Node {
 
 	private char value;
 
-	protected OperatorNode(char value, int level) {
-		super(level);
-
-		if (isValidValue(value))
-			this.value = value;
-	}
-
 	protected OperatorNode(char value) {
-		super();
-
 		if (isValidValue(value))
 			this.value = value;
 	}
@@ -38,7 +30,6 @@ class OperatorNode extends Node {
 		return (value == '+' || value == '-' || value == '*' || value == '/');
 	}
 
-	@Override
 	public String getStringValue() {
 		return "" + value;
 	}

@@ -1,74 +1,71 @@
 package model.gp;
 
 /**
- * abstract superclass for Nodes. Establishes all the methods every node should
- * have (getters/setters, treelevel, parent/child nodes, etc.)
+ * Abstract Node superclass. Ensures that every extended subclass of Node can
+ * call getStringValue() (thanks to the HasValue interface), and can get and set
+ * parent-child relationships.
  */
 abstract class Node implements HasValue {
 	private Node parent;
-	private Node aChild;
-	private Node bChild;
-	private int level;
+	private Node aChild; // left child
+	private Node bChild; // right child
 
 	/**
-	 * New node with no parent set.
-	 */
-	protected Node(int level) {
-		this.parent = null;
-		this.aChild = null;
-		this.bChild = null;
-		this.level = level;
-	}
-
-	/**
-	 * New node with parent set.
-	 */
-	protected Node() {
-		this.parent = null;
-		aChild = null;
-		bChild = null;
-		this.level = 0;
-	}
-
-	/**
-	 * Sets parent node for current node.
+	 * Sets a parent node for this Node instance.
 	 * 
-	 * @return true if successful.
+	 * @param parent
+	 *            Incoming parent node.
 	 */
-	protected boolean setParent(Node parent) {
+	protected void setParent(Node parent) {
 		if (this.parent == null) {
 			this.parent = parent;
-			return true;
-		} else
-			return false;
+		}
 	}
 
 	/**
-	 * Sets child node for current node.
+	 * Sets the incoming Node as a child of this Node instance if two child
+	 * nodes are already not present. Child node will be the left-child if
+	 * empty, right-child if one other child node is already present, or do
+	 * nothing if no room.
 	 * 
-	 * @return true if successful.
+	 * @param child
+	 *            Incoming child node
 	 */
-	protected void setLeftChild(Node child) {
+	protected void setAsChild(Node child) {
+		if (aChild == null) {
 			aChild = child;
+			aChild.setParent(this);
+		} else if (bChild == null) {
+			bChild = child;
+			bChild.setParent(this);
+		}
 	}
-	
-	protected void setRightChild(Node child) {
-		bChild = child;
-}
 
+	/**
+	 * Gets parent node for current node.
+	 * 
+	 * @return This instance's parent node.
+	 */
 	protected Node getParent() {
 		return this.parent;
 	}
 
+	/**
+	 * Gets this instance's left child node.
+	 * 
+	 * @return the left child node.
+	 */
 	protected Node getLeftChild() {
-				return aChild;
+		return aChild;
 	}
-	
+
+	/**
+	 * Gets this instance's right child node.
+	 * 
+	 * @return The right child node.
+	 */
 	protected Node getRightChild() {
 		return bChild;
-}
-
-	protected int getLevel() {
-		return this.level;
 	}
+
 }

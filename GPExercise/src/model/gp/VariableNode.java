@@ -11,13 +11,7 @@ class VariableNode extends Node {
 
 	private char value;
 
-	protected VariableNode(int level) {
-		super(level);
-		value = 'x';
-	}
-
 	protected VariableNode() {
-		super();
 		value = 'x';
 	}
 

@@ -2,82 +2,96 @@ package model.gp;
 
 import java.util.Random;
 
+/**
+ * Creates an equation tree in order to populate the Genetic Programming Fitness
+ * Tournament. Equation operations are randomized, as are the operands.
+ */
 public class Tree implements Comparable<Tree> {
 
-	private int height; // height of the tree
 	private OperatorNode root; // root node of the tree
-	private Random rand; // randomizer for generating values and
-								// randomizing decisions.
-	private int numNodesInBottomLevel; // tracks how many nodes should be in the
-										// level about to be created
-	private Node lastCreatedNode;
 
 	/**
-	 * Constructs a tree out of OperatorNodes, OperandNodes, and VariableNodes.
+	 * Constructs a randomized equation tree out of OperatorNodes, OperandNodes,
+	 * and VariableNodes.
 	 * 
 	 * @param height
-	 *            how many levels deep the tree should grow.
+	 *            Represents how many levels deep the tree should grow.
 	 */
 	public Tree(int height) {
-		rand = new Random();
-		this.height = height;
-		root = new OperatorNode(Tree.setRandomOp(), 0);
-		this.insert(root, null);
-		numNodesInBottomLevel = 1;
-		lastCreatedNode = root;
+		this.root = new OperatorNode(setRandomOp());
+		new Branch((Node) root, height);
 
-		for (int i = 1; i < height; i++) {
-			numNodesInBottomLevel = 2 * numNodesInBottomLevel;
-			for (int j = 0; j < numNodesInBottomLevel; j++) {
-				double randomizer = rand.nextDouble();
-				if (i < height - 1 && randomizer < .50) {
-					OperatorNode temp = new OperatorNode(setRandomOp(), i);
-					this.insert(temp, lastCreatedNode);
-					lastCreatedNode = temp;
-				} else if (randomizer >= .50 && randomizer < .90) {
-					OperandNode temp = new OperandNode(rand.nextInt(10), i);
-					this.insert(temp, lastCreatedNode);
-					lastCreatedNode = temp;
-				} else {
-					VariableNode temp = new VariableNode(i);
-					this.insert(temp, lastCreatedNode);
-					lastCreatedNode = temp;
-				}
+	}
+
+	/**
+	 * Evaluates the equation tree recursively, returning the values of the
+	 * bottom Operand Nodes and traversing upward back to the root node. Order
+	 * of operations is preserved by treating every branch as a parenthetical.
+	 * 
+	 * @param rootnode
+	 *            Root of the equation tree we're evaluation.
+	 * @param valueForX
+	 *            The variable "x" value we're testing with this particular
+	 *            trial.
+	 * @return The result of the equation given valueForX as the value of "x".
+	 */
+	public double eval(Node rootnode, int valueForX) {
+		if (rootnode.getLeftChild() == null && rootnode.getRightChild() == null) {
+			if (rootnode instanceof OperandNode) {
+				OperandNode temp = (OperandNode) rootnode;
+				return temp.getValue();
+			} else {
+				return valueForX;
+			}
+		} else {
+			OperatorNode op = (OperatorNode) rootnode;
+			char operator = op.getValue();
+
+			switch (operator) {
+			case '-':
+				return eval(rootnode.getLeftChild(), valueForX)
+						- eval(rootnode.getRightChild(), valueForX);
+			case '*':
+				return eval(rootnode.getLeftChild(), valueForX)
+						* eval(rootnode.getRightChild(), valueForX);
+			case '/':
+				double denominator = eval(rootnode.getRightChild(), valueForX);
+				double numerator = eval(rootnode.getLeftChild(), valueForX);
+				if (denominator == 0)
+					return numerator;
+				else
+					return numerator / denominator;
+			default:
+				return eval(rootnode.getLeftChild(), valueForX)
+						+ eval(rootnode.getRightChild(), valueForX);
 			}
 		}
-	}
-	//TODO this is probably broken
-	private boolean insert(Node node, Node parent) {
-		if (parent == null && node instanceof OperatorNode) {
-			root = (OperatorNode) node;
-			root.setParent(null);
-			return true;
-		} else if (parent != null && parent instanceof OperatorNode) {
-			parent.setLeftChild(node);
-			node.setParent(parent);
-			return true;
-		} else if (parent != null && parent instanceof OperandNode) {
-			Node properspot = backtrackToFindValidNode(parent);
-			properspot.setRightChild(node);
-			node.setParent(properspot);
-			return true;
 
-		} else
-			return false;
 	}
 
-	private Node backtrackToFindValidNode(Node node) {
-		if (node.getRightChild() == null)
-			return node;
+	public String getString(Node rootnode) {
+		// TODO
+		if (rootnode.getLeftChild() == null && rootnode.getRightChild() == null)
+			return rootnode.getStringValue();
 		else
-			return backtrackToFindValidNode(node.getParent());
+			return "(" + getString(rootnode.getLeftChild()) + ")"
+					+ rootnode.getStringValue() + "("
+					+ getString(rootnode.getRightChild()) + ")";
+	}
+
+	public int compareTo(Tree t) {
+		// TODO
+		return 0;
+	}
+
+	public Node getRoot() {
+		return this.root;
 	}
 
 	private static char setRandomOp() {
 		int opdecider; // used with randomizer to determine Node values for
 						// operators
 		Random r = new Random();
-		
 		opdecider = r.nextInt(4);
 		char solution;
 
@@ -99,85 +113,56 @@ public class Tree implements Comparable<Tree> {
 		return solution;
 	}
 
-	//TODO: rewrite this to take a tree as a parameter. Probably broken too.
-	public double eval(Node rootnode, int valueForX) {
-		if (rootnode == null) {
-			return 0;
-		} else if (rootnode instanceof OperatorNode) {
-			OperatorNode op = (OperatorNode) rootnode;
+	private class Branch {
+		private Node root;
 
-			if (op.getValue() == '-') {
-				return eval(rootnode.getRightChild(), valueForX)
-						- eval(rootnode.getLeftChild(), valueForX);
-			} else if (op.getValue() == '*') {
-				return eval(rootnode.getRightChild(), valueForX)
-						* eval(rootnode.getLeftChild(), valueForX);
-			} else if (op.getValue() == '/') {
-				double temp = eval(rootnode.getLeftChild(), valueForX);
-				if (temp == 0) {
-					return eval(rootnode.getRightChild(), valueForX)
-							+ temp;
-				} else {
-					return eval(rootnode.getRightChild(), valueForX)
-							/ eval(rootnode.getLeftChild(), valueForX);
-				}
+		private Branch(Node root, Branch leftChild, Branch rightChild) {
+			this.root = root;
+			try {
+				this.root.setAsChild(leftChild.getRoot());
+				this.root.setAsChild(rightChild.getRoot());
+			} catch (NullPointerException e) {
+			}
+		}
+
+		private Branch(Node root, int height) {
+			buildTree(root, height);
+		}
+
+		private Branch buildTree(Node root, int height) {
+			if (height == 0) {
+				return new Branch(root, null, null);
+			} else if (height == 1) {
+				Node left = randomIntOrVariable();
+				Node right = randomIntOrVariable();
+				return new Branch(root, buildTree(left, height - 1), buildTree(
+						right, height - 1));
 			} else {
-				return eval(rootnode.getRightChild(), valueForX)
-						+ eval(rootnode.getLeftChild(), valueForX);
-			}
-		} else if (rootnode instanceof OperandNode) {
-			OperandNode temp = (OperandNode) rootnode;
-			return temp.getValue();
-		} else
-			return valueForX;
-	}
-	
-	//TODO This is broken. Fix so this works.
-	public String getString(Node rootnode) {
-		boolean isBottom = isOperandLeaf(rootnode.getLeftChild()) && isOperandLeaf(rootnode.getRightChild()); 
-		boolean leftIsBottom = isOperandLeaf(rootnode.getLeftChild()) && !isOperandLeaf(rootnode.getRightChild());
-		boolean rightIsBottom = !isOperandLeaf(rootnode.getLeftChild()) && isOperandLeaf(rootnode.getRightChild());
-		
-		if (isBottom)
-		{
-			return rootnode.getLeftChild().getStringValue() + rootnode.getStringValue() + rootnode.getRightChild().getStringValue();
-		}
-		else if (leftIsBottom)
-		{
-			return rootnode.getLeftChild().getStringValue() + rootnode.getStringValue() + getString(rootnode.getRightChild());
-		}
-		else if (rightIsBottom)
-		{
-			return getString(rootnode.getLeftChild()) + rootnode.getStringValue() + rootnode.getRightChild().getStringValue();
-		}
-		else return "";
-	}
-	
-	private boolean isOperandLeaf(Node node)
-	{
-		if (node == null)
-			return false;
-		else if (node.getLeftChild() == null && node.getRightChild() == null)
-		{
-			if (node instanceof OperatorNode || node instanceof VariableNode){
-				return true;
+				Node left = new OperatorNode(setRandomOp());
+				Node right = new OperatorNode(setRandomOp());
+				return new Branch(root, buildTree(left, height - 1), buildTree(
+						right, height - 1));
 			}
 		}
-	 return false;
-	}
 
-	public int compareTo(Tree t) {
-		// TODO
-		return 0;
-	}
+		/**
+		 * Creates a random Operand or Variable Node for use in the equation.
+		 * Ensures that a Variable value appears at least 10% of the time.
+		 * 
+		 * @return Randomized Operand/Variable Node.
+		 */
+		private Node randomIntOrVariable() {
+			Random r = new Random();
 
-	public int getHeight() {
-		return this.height;
-	}
-	
-	public Node getRoot()
-	{
-		return this.root;
+			if (r.nextDouble() < .90)
+				return new OperandNode(r.nextInt(10));
+			else
+				return new VariableNode();
+		}
+
+		private Node getRoot() {
+			return this.root;
+		}
 	}
 
 }
