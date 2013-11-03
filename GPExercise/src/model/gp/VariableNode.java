@@ -15,13 +15,13 @@ class VariableNode extends Node {
 		value = 'x';
 	}
 
-	protected char getValue() {
-		return value;
-	}
-
 	@Override
 	public String getStringValue() {
 		return "x";
+	}
+
+	protected char getValue() {
+		return value;
 	}
 
 }

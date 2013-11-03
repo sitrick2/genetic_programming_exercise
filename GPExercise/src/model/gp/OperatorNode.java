@@ -14,8 +14,16 @@ class OperatorNode extends Node {
 			this.value = value;
 	}
 
+	public String getStringValue() {
+		return "" + value;
+	}
+
 	protected char getValue() {
 		return value;
+	}
+
+	private boolean isValidValue(char value) {
+		return (value == '+' || value == '-' || value == '*' || value == '/');
 	}
 
 	protected boolean setValue(char value) {
@@ -24,13 +32,5 @@ class OperatorNode extends Node {
 			return true;
 		} else
 			return false;
-	}
-
-	private boolean isValidValue(char value) {
-		return (value == '+' || value == '-' || value == '*' || value == '/');
-	}
-
-	public String getStringValue() {
-		return "" + value;
 	}
 }

@@ -1,4 +1,11 @@
-package model.gp;
+package controller;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
+
+import model.fitness.tournament.TestData;
+import model.fitness.tournament.Tournament;
 
 /**
  * @author sitrick2
@@ -22,28 +29,43 @@ package model.gp;
  *         - Tree creation and printing of the equation as a String.
  *         <p>
  *         - Evaluation of the equation tree given a particular value X.
- * 
- *         <p>
- *         What doesn't work:
- *         <p>
- *         - Everything for this iteration currently functions!
- * 
- *         <p>
- *         What's left to add:
  *         <p>
  *         - Receive Testing Data input from user.
  *         <p>
  *         - Populate Fitness Tournament to calculate distance from Testing
  *         Data.
  *         <p>
+ * 
+ *         What doesn't work:
+ *         <p>
+ *         - Everything for this iteration currently functions!
+ * 
+ *         <p>
+ *         What's left to add:
+ * 
+ *         <p>
  *         - Add mutate and crossover methods to evolve tournament winners.
  *         <p>
  *         - Eventually add GUI.
  */
-public class Test {
-	public static void main(String[] args) {
-		Tree testtree = new Tree(3);
-		System.out.println(testtree.getString(testtree.getRoot()));
-		System.out.println(testtree.eval(testtree.getRoot(), 0));
+
+public class StartGP {
+
+	public static void main(String[] args) throws FileNotFoundException {
+
+		HashMap<Integer, Double> testdata = TestData.getTestValues(new File(
+				"res/testdata.txt"));
+
+		Tournament tourney = new Tournament(testdata);
+		tourney.testValues();
+
+		while (!tourney.validSolutionExists(40)
+				&& tourney.getPopulation().size() > 2) {
+			tourney.startTournamentRound(tourney.getPopulation());
+		}
+
+		if (tourney.validSolutionExists(40))
+			System.out.println(tourney.getValidSolution().getString(
+					tourney.getValidSolution().getRoot()));
 	}
 }

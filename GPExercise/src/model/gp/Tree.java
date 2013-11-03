@@ -1,5 +1,6 @@
 package model.gp;
 
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -8,7 +9,121 @@ import java.util.Random;
  */
 public class Tree implements Comparable<Tree> {
 
+	/**
+	 * Interior class used to assist in the mechanics of building up the Tree.
+	 */
+	private class Branch {
+		private Node root;
+
+		/**
+		 * Constructor to facilitate recursion in buildTree(). Should not be
+		 * called outside of the Branch class.
+		 * 
+		 * @param root
+		 *            Base Node for this trio of Nodes.
+		 * @param leftChild
+		 *            root's left child Node.
+		 * @param rightChild
+		 *            root's right child Node.
+		 */
+		private Branch(Node root, Branch leftChild, Branch rightChild) {
+			this.root = root;
+			try {
+				this.root.setAsChild(leftChild.getRoot());
+				this.root.setAsChild(rightChild.getRoot());
+			} catch (NullPointerException e) {
+			}
+		}
+
+		/**
+		 * Called by the Tree class, which provides a root Node and the desired
+		 * height.
+		 * 
+		 * @param root
+		 *            The root Node of the Tree class.
+		 * @param height
+		 *            How deep to build the Tree.
+		 */
+		private Branch(Node root, int height) {
+			buildTree(root, height);
+		}
+
+		/**
+		 * Recursive function that builds up a Tree object to the specified
+		 * height.
+		 * 
+		 * @param root
+		 *            Rootnode of the Tree object to be constructed.
+		 * @param height
+		 *            Height of the Tree.
+		 * @return The newly-created Branch. This allows for recursion.
+		 */
+		private Branch buildTree(Node root, int height) {
+			if (height == 0) {
+				return new Branch(root, null, null);
+			} else if (height == 1) {
+				Node left = randomIntOrVariable();
+				Node right = randomIntOrVariable();
+				return new Branch(root, buildTree(left, height - 1), buildTree(
+						right, height - 1));
+			} else {
+				Node left = new OperatorNode(setRandomOp());
+				Node right = new OperatorNode(setRandomOp());
+				return new Branch(root, buildTree(left, height - 1), buildTree(
+						right, height - 1));
+			}
+		}
+
+		private Node getRoot() {
+			return this.root;
+		}
+
+		/**
+		 * Creates a random Operand or Variable Node for use in the equation.
+		 * Ensures that a Variable value appears 20% of the time.
+		 * 
+		 * @return Randomized Operand/Variable Node.
+		 */
+		private Node randomIntOrVariable() {
+			Random r = new Random();
+
+			if (r.nextDouble() < .80)
+				return new OperandNode(r.nextInt(10));
+			else
+				return new VariableNode();
+		}
+	}
+
+	private static char setRandomOp() {
+		int opdecider; // used with randomizer to determine Node values for
+						// operators
+		Random r = new Random();
+		opdecider = r.nextInt(4);
+		char solution;
+
+		switch (opdecider) {
+		case 0:
+			solution = '+';
+			break;
+		case 1:
+			solution = '-';
+			break;
+		case 2:
+			solution = '*';
+			break;
+		default:
+			solution = '/';
+			break;
+		}
+
+		return solution;
+	}
+
 	private OperatorNode root; // root node of the tree
+
+	private double fitnessresult; // average distance between the result of
+									// eval() and the test solution for each
+									// entry in the testing data.
 
 	/**
 	 * Constructs a randomized equation tree out of OperatorNodes, OperandNodes,
@@ -20,7 +135,13 @@ public class Tree implements Comparable<Tree> {
 	public Tree(int height) {
 		this.root = new OperatorNode(setRandomOp());
 		new Branch((Node) root, height);
+		this.fitnessresult = Double.MAX_VALUE;
 
+	}
+
+	public int compareTo(Tree t) {
+
+		return (int) this.fitnessresult - (int) t.getFitness();
 	}
 
 	/**
@@ -35,7 +156,7 @@ public class Tree implements Comparable<Tree> {
 	 *            trial.
 	 * @return The result of the equation given valueForX as the value of "x".
 	 */
-	public double eval(Node rootnode, int valueForX) {
+	private double eval(Node rootnode, int valueForX) {
 		if (rootnode.getLeftChild() == null && rootnode.getRightChild() == null) {
 			if (rootnode instanceof OperandNode) {
 				OperandNode temp = (OperandNode) rootnode;
@@ -69,8 +190,15 @@ public class Tree implements Comparable<Tree> {
 
 	}
 
+	public double getFitness() {
+		return this.fitnessresult;
+	}
+
+	public Node getRoot() {
+		return this.root;
+	}
+
 	public String getString(Node rootnode) {
-		// TODO
 		if (rootnode.getLeftChild() == null && rootnode.getRightChild() == null)
 			return rootnode.getStringValue();
 		else
@@ -79,90 +207,36 @@ public class Tree implements Comparable<Tree> {
 					+ getString(rootnode.getRightChild()) + ")";
 	}
 
-	public int compareTo(Tree t) {
-		// TODO
-		return 0;
-	}
+	/**
+	 * Compares the values in the testing data set against the values returned
+	 * by the equation tree for the specified value.
+	 * 
+	 * @param testingdata
+	 *            HashMap containing the values to test the Tree object's
+	 *            fitness against.
+	 * @return The average distance from the Tree's equation to the solution
+	 *         provided by the testingdata.
+	 */
+	public double testFitness(HashMap<Integer, Double> testingdata) {
+		double sum = 0;
+		int numOfSuccessfulTests = 0;
 
-	public Node getRoot() {
-		return this.root;
-	}
-
-	private static char setRandomOp() {
-		int opdecider; // used with randomizer to determine Node values for
-						// operators
-		Random r = new Random();
-		opdecider = r.nextInt(4);
-		char solution;
-
-		switch (opdecider) {
-		case 0:
-			solution = '+';
-			break;
-		case 1:
-			solution = '-';
-			break;
-		case 2:
-			solution = '*';
-			break;
-		default:
-			solution = '/';
-			break;
-		}
-
-		return solution;
-	}
-
-	private class Branch {
-		private Node root;
-
-		private Branch(Node root, Branch leftChild, Branch rightChild) {
-			this.root = root;
+		for (int i = 0; i < testingdata.size(); i++) {
 			try {
-				this.root.setAsChild(leftChild.getRoot());
-				this.root.setAsChild(rightChild.getRoot());
-			} catch (NullPointerException e) {
+				sum += Math.abs(this.eval(this.root, i) - testingdata.get(i));
+				++numOfSuccessfulTests;
+			} catch (Exception e) {
 			}
 		}
 
-		private Branch(Node root, int height) {
-			buildTree(root, height);
+		if (numOfSuccessfulTests == 0) {
+			this.fitnessresult = Double.MAX_VALUE;
+		} else {
+			this.fitnessresult = sum / numOfSuccessfulTests;
 		}
 
-		private Branch buildTree(Node root, int height) {
-			if (height == 0) {
-				return new Branch(root, null, null);
-			} else if (height == 1) {
-				Node left = randomIntOrVariable();
-				Node right = randomIntOrVariable();
-				return new Branch(root, buildTree(left, height - 1), buildTree(
-						right, height - 1));
-			} else {
-				Node left = new OperatorNode(setRandomOp());
-				Node right = new OperatorNode(setRandomOp());
-				return new Branch(root, buildTree(left, height - 1), buildTree(
-						right, height - 1));
-			}
-		}
+		return this.fitnessresult;
 
-		/**
-		 * Creates a random Operand or Variable Node for use in the equation.
-		 * Ensures that a Variable value appears at least 10% of the time.
-		 * 
-		 * @return Randomized Operand/Variable Node.
-		 */
-		private Node randomIntOrVariable() {
-			Random r = new Random();
-
-			if (r.nextDouble() < .90)
-				return new OperandNode(r.nextInt(10));
-			else
-				return new VariableNode();
-		}
-
-		private Node getRoot() {
-			return this.root;
-		}
 	}
 
 }

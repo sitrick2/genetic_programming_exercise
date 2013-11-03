@@ -13,12 +13,16 @@ class OperandNode extends Node {
 			this.value = value;
 	}
 
+	public String getStringValue() {
+		return "" + value;
+	}
+
 	protected int getValue() {
 		return value;
 	}
 
-	public String getStringValue() {
-		return "" + value;
+	private boolean isValidValue(int value) {
+		return (value >= 0 && value < 10);
 	}
 
 	protected boolean setValue(int value) {
@@ -27,9 +31,5 @@ class OperandNode extends Node {
 			return true;
 		} else
 			return false;
-	}
-
-	private boolean isValidValue(int value) {
-		return (value >= 0 && value < 10);
 	}
 }

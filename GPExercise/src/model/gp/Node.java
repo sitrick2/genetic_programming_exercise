@@ -11,15 +11,30 @@ abstract class Node implements HasValue {
 	private Node bChild; // right child
 
 	/**
-	 * Sets a parent node for this Node instance.
+	 * Gets this instance's left child node.
 	 * 
-	 * @param parent
-	 *            Incoming parent node.
+	 * @return the left child node.
 	 */
-	protected void setParent(Node parent) {
-		if (this.parent == null) {
-			this.parent = parent;
-		}
+	protected Node getLeftChild() {
+		return aChild;
+	}
+
+	/**
+	 * Gets parent node for current node.
+	 * 
+	 * @return This instance's parent node.
+	 */
+	protected Node getParent() {
+		return this.parent;
+	}
+
+	/**
+	 * Gets this instance's right child node.
+	 * 
+	 * @return The right child node.
+	 */
+	protected Node getRightChild() {
+		return bChild;
 	}
 
 	/**
@@ -42,30 +57,15 @@ abstract class Node implements HasValue {
 	}
 
 	/**
-	 * Gets parent node for current node.
+	 * Sets a parent node for this Node instance.
 	 * 
-	 * @return This instance's parent node.
+	 * @param parent
+	 *            Incoming parent node.
 	 */
-	protected Node getParent() {
-		return this.parent;
-	}
-
-	/**
-	 * Gets this instance's left child node.
-	 * 
-	 * @return the left child node.
-	 */
-	protected Node getLeftChild() {
-		return aChild;
-	}
-
-	/**
-	 * Gets this instance's right child node.
-	 * 
-	 * @return The right child node.
-	 */
-	protected Node getRightChild() {
-		return bChild;
+	protected void setParent(Node parent) {
+		if (this.parent == null) {
+			this.parent = parent;
+		}
 	}
 
 }
