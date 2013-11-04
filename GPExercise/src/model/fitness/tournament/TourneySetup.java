@@ -19,7 +19,7 @@ class TourneySetup {
 	 */
 	protected static ArrayList<Tree> setupTourney() {
 		testtrees = new ArrayList<Tree>();
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 100; i++) {
 			Tree temp = new Tree(3);
 			testtrees.add(temp);
 		}

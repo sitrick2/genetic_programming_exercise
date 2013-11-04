@@ -28,6 +28,7 @@ public class Tree implements Comparable<Tree> {
 		 */
 		private Branch(Node root, Branch leftChild, Branch rightChild) {
 			this.root = root;
+
 			try {
 				this.root.setAsChild(leftChild.getRoot());
 				this.root.setAsChild(rightChild.getRoot());
@@ -86,7 +87,6 @@ public class Tree implements Comparable<Tree> {
 		 */
 		private Node randomIntOrVariable() {
 			Random r = new Random();
-
 			if (r.nextDouble() < .80)
 				return new OperandNode(r.nextInt(10));
 			else
@@ -119,6 +119,8 @@ public class Tree implements Comparable<Tree> {
 		return solution;
 	}
 
+	private Random r;
+
 	private OperatorNode root; // root node of the tree
 
 	private double fitnessresult; // average distance between the result of
@@ -133,6 +135,7 @@ public class Tree implements Comparable<Tree> {
 	 *            Represents how many levels deep the tree should grow.
 	 */
 	public Tree(int height) {
+		r = new Random();
 		this.root = new OperatorNode(setRandomOp());
 		new Branch((Node) root, height);
 		this.fitnessresult = Double.MAX_VALUE;
@@ -142,6 +145,18 @@ public class Tree implements Comparable<Tree> {
 	public int compareTo(Tree t) {
 
 		return (int) this.fitnessresult - (int) t.getFitness();
+	}
+
+	/**
+	 * Finds a random node in the tree, removes its attached branch or branches,
+	 * and exchanges it with a similar branch from the partner tree.
+	 * 
+	 * @param partner
+	 *            The companion tree to exchange branches with.
+	 */
+	public void crossover(Tree partner) {
+		this.findRandomNode(this.getRoot()).replace(
+				partner.findRandomNode(partner.getRoot()));
 	}
 
 	/**
@@ -190,6 +205,18 @@ public class Tree implements Comparable<Tree> {
 
 	}
 
+	private Node findRandomNode(Node startingnode) {
+		double test = r.nextDouble();
+		if (startingnode == null)
+			return findRandomNode(this.getRoot());
+		else if (test < .10)
+			return startingnode;
+		else if (test >= .10 && test < .55)
+			return findRandomNode(startingnode.getLeftChild());
+		else
+			return findRandomNode(startingnode.getRightChild());
+	}
+
 	public double getFitness() {
 		return this.fitnessresult;
 	}
@@ -198,6 +225,16 @@ public class Tree implements Comparable<Tree> {
 		return this.root;
 	}
 
+	/**
+	 * Returns a String representation of the equation tree. Uses recursion to
+	 * break the equation down into recursive binaries.
+	 * 
+	 * @param rootnode
+	 *            The root of the tree. Essentially the center of the equation
+	 *            tree.
+	 * @return The equation string. Recursion is used to break the equation into
+	 *         easily retrievable binary expressions.
+	 */
 	public String getString(Node rootnode) {
 		if (rootnode.getLeftChild() == null && rootnode.getRightChild() == null)
 			return rootnode.getStringValue();
@@ -205,6 +242,21 @@ public class Tree implements Comparable<Tree> {
 			return "(" + getString(rootnode.getLeftChild()) + ")"
 					+ rootnode.getStringValue() + "("
 					+ getString(rootnode.getRightChild()) + ")";
+	}
+
+	/**
+	 * Chooses a random Node in the tree and mutates the value.
+	 */
+	public void mutate() {
+		Node n = this.findRandomNode(this.getRoot());
+
+		if (n instanceof OperatorNode) {
+			((OperatorNode) n).setValue(setRandomOp());
+		} else if (n instanceof OperandNode) {
+			((OperandNode) n).setValue(r.nextInt(10));
+		} else {
+		}
+		;
 	}
 
 	/**
@@ -238,5 +290,4 @@ public class Tree implements Comparable<Tree> {
 		return this.fitnessresult;
 
 	}
-
 }

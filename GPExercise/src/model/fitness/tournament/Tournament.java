@@ -2,6 +2,7 @@ package model.fitness.tournament;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import model.gp.Tree;
 
@@ -36,6 +37,10 @@ public class Tournament {
 		return this.solution;
 	}
 
+	public void refreshPopulation() {
+		this.population = TourneySetup.setupTourney();
+	}
+
 	/**
 	 * Initializes the tournament round, comparing pairs of equation Trees and
 	 * keeping the Tree with a better Fitness value. If there is an odd number
@@ -49,6 +54,7 @@ public class Tournament {
 	 */
 	public ArrayList<Tree> startTournamentRound(ArrayList<Tree> pop) {
 		ArrayList<Tree> winners = new ArrayList<Tree>();
+		Random r = new Random();
 
 		if (pop.size() % 2 != 0)
 			winners.add(pop.get(pop.size() - 1));
@@ -61,6 +67,16 @@ public class Tournament {
 			}
 		}
 		this.population = winners;
+
+		for (int i = 1; i < this.population.size(); i += 2) {
+			double randomizer = r.nextDouble();
+			if (randomizer < .05) {
+				population.get(i).mutate();
+			} else if (randomizer >= .05 && randomizer < .10)
+				population.get(i - 1).mutate();
+
+			population.get(i).crossover(population.get(i - 1));
+		}
 
 		return this.population;
 	}
@@ -93,5 +109,4 @@ public class Tournament {
 
 		return false;
 	}
-
 }

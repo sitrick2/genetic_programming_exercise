@@ -38,6 +38,31 @@ abstract class Node implements HasValue {
 	}
 
 	/**
+	 * Method to assist Tree crossover. Exchanges this Node's parent with the
+	 * replacement's parent.
+	 * 
+	 * @param replacement
+	 */
+	protected void replace(Node replacement) {
+		Node temp = replacement;
+		Node oldparent = this.getParent();
+		Node newparent = replacement.getParent();
+
+		if (oldparent != null && newparent != null) {
+			if (newparent.getLeftChild().equals(replacement))
+				newparent.setLeftChild(this);
+			else if (newparent.getRightChild().equals(replacement))
+				newparent.setRightChild(this);
+
+			if (oldparent.getLeftChild().equals(this))
+				oldparent.setLeftChild(temp);
+			else if (oldparent.getRightChild().equals(this))
+				oldparent.setRightChild(temp);
+		}
+
+	}
+
+	/**
 	 * Sets the incoming Node as a child of this Node instance if two child
 	 * nodes are already not present. Child node will be the left-child if
 	 * empty, right-child if one other child node is already present, or do
@@ -56,6 +81,11 @@ abstract class Node implements HasValue {
 		}
 	}
 
+	protected void setLeftChild(Node child) {
+		this.aChild = child;
+		aChild.setParent(this);
+	}
+
 	/**
 	 * Sets a parent node for this Node instance.
 	 * 
@@ -63,9 +93,12 @@ abstract class Node implements HasValue {
 	 *            Incoming parent node.
 	 */
 	protected void setParent(Node parent) {
-		if (this.parent == null) {
-			this.parent = parent;
-		}
+		this.parent = parent;
+	}
+
+	protected void setRightChild(Node child) {
+		this.bChild = child;
+		bChild.setParent(this);
 	}
 
 }
